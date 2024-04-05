@@ -1,0 +1,16 @@
+# sam build && sam deploy --resolve-s3
+
+version = 0.1
+
+[default.deploy.parameters]
+profile = "prx-it-services"
+stack_name = "classy-toolkit"
+s3_prefix = "classy-toolkit"
+confirm_changeset = false
+capabilities = "CAPABILITY_IAM"
+region = "us-east-2"
+# Parameter overrides only need to be included when a parameter is changing
+# parameter_overrides = [
+#   "ClassyApiClientId=",
+#   "ClassyApiClientSecret="
+# ]

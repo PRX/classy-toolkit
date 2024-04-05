@@ -1,42 +1,31 @@
-# etc/adzerk-poller/template.yml
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 
-Description: >-
-  Creates a Lambda function that polls the Classy API for recent activity, and
-  sends messages to Slack for certain activities
+Description: A collection of utilities that integrate with Classy
 
 Parameters:
   ClassyApiClientId:
     Type: String
   ClassyApiClientSecret:
     Type: String
-  SlackMessageRelayTopicArn:
-    Type: String
   Frequency:
     Type: String
     Description: In minutes, greater than 1
     Default: 2
-  CounterBucket:
-    Type: String
-  CounterObject:
-    Type: String
 
 Resources:
-  PollerFunction:
+  ActivitySlackNotificationsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: index.js
+      CodeUri: src/activity-slack-notifications
       Description: >-
-        Polls Classy for new activity
+        Polls the Classy API for recent activity, and sends messages to Slack
+        for certain activities
       Environment:
         Variables:
           CLASSY_API_CLIENT_ID: !Ref ClassyApiClientId
           CLASSY_API_CLIENT_SECRET: !Ref ClassyApiClientSecret
-          SLACK_MESSAGE_RELAY_SNS_TOPIC_ARN: !Ref SlackMessageRelayTopicArn
           POLLING_FREQUENCY: !Ref Frequency
-          COUNTER_BUCKET: !Ref CounterBucket
-          COUNTER_OBJECT: !Ref CounterObject
       Events:
         Poller:
           Properties:
@@ -48,45 +37,54 @@ Resources:
       MemorySize: 128
       Policies:
         - Statement:
-            - Action: sns:Publish
+            - Action: events:PutEvents
               Effect: Allow
-              Resource: !Ref SlackMessageRelayTopicArn
+              Resource: !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:event-bus/default
+              Sid: AllowDefaultEventBusPut
           Version: "2012-10-17"
-        - Statement:
-            - Action: sns:Publish
-              Effect: Allow
-              Resource: !Ref SlackMessageRelayTopicArn
-            - Action:
-                - s3:getObject
-                - s3:putObject
-              Effect: Allow
-              Resource: !Sub arn:aws:s3:::${CounterBucket}/${CounterObject}
-          Version: "2012-10-17"
-      Runtime: nodejs18.x
-      # Tags:
-      #   Project: Misc
-      #   prx:cloudformation:stack-name: !Ref AWS::StackName
-      #   prx:cloudformation:stack-id: !Ref AWS::StackId
+      Runtime: nodejs20.x
+      Tags:
+        prx:meta:tagging-version: 2021-04-07
+        prx:cloudformation:stack-name: !Ref AWS::StackName
+        prx:cloudformation:stack-id: !Ref AWS::StackId
+        prx:ops:environment: Production
+        prx:dev:application: Classy Toolkit
       Timeout: 180
-  PollerFunctionLogGroup:
+  ActivitySlackNotificationsLogGroup:
     Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Properties:
-      LogGroupName: !Sub /aws/lambda/${PollerFunction}
+      LogGroupName: !Sub /aws/lambda/${ActivitySlackNotificationsFunction}
       RetentionInDays: 30
-  PollerFunctionErrorAlarm:
+      Tags:
+        - { Key: prx:meta:tagging-version, Value: "2021-04-07" }
+        - { Key: prx:cloudformation:stack-name, Value: !Ref AWS::StackName }
+        - { Key: prx:cloudformation:stack-id, Value: !Ref AWS::StackId }
+        - { Key: prx:ops:environment, Value: Production }
+        - { Key: prx:dev:application, Value: Classy Toolkit }
+  ActivitySlackNotificationsErrorAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmName: "MINOR [Classy] Activity Poller <prod> EXPERIENCING ERRORS"
+      AlarmName: "MINOR [Classy] Activity Notifications <prod> EXPERIENCING ERRORS"
       AlarmDescription: >-
-        The error rate on the Classy app has exceeded 0.
+        The error rate on the Classy toolkit activity Slack notifications
+        Lambda function has exceeded 0. Some donation activity may not be
+        reaching Slack channels.
       ComparisonOperator: GreaterThanThreshold
       Dimensions:
         - Name: FunctionName
-          Value: !Ref PollerFunction
+          Value: !Ref ActivitySlackNotificationsFunction
       EvaluationPeriods: 2
       MetricName: Errors
       Namespace: AWS/Lambda
       Period: 60
       Statistic: Sum
+      Tags:
+        - { Key: prx:meta:tagging-version, Value: "2021-04-07" }
+        - { Key: prx:cloudformation:stack-name, Value: !Ref AWS::StackName }
+        - { Key: prx:cloudformation:stack-id, Value: !Ref AWS::StackId }
+        - { Key: prx:ops:environment, Value: Production }
+        - { Key: prx:dev:application, Value: Classy Toolkit }
       Threshold: 0
       TreatMissingData: notBreaching

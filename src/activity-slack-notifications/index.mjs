@@ -119,24 +119,6 @@ function httpGet(token, path) {
   });
 }
 
-// function getCount() {
-//   return new Promise((resolve, reject) => {
-//     s3.getObject(
-//       {
-//         Bucket: process.env.COUNTER_BUCKET,
-//         Key: process.env.COUNTER_OBJECT,
-//       },
-//       (err, data) => {
-//         if (err) {
-//           reject(err);
-//         } else {
-//           resolve(+data.Body.toString('utf8'));
-//         }
-//       },
-//     );
-//   });
-// }
-
 function shortMemberName(member, tx) {
   if (tx.is_anonymous) {
     return `_Anonymous_`;
