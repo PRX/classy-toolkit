@@ -1,23 +1,23 @@
 {
-  "name": "zendesk-toolkit",
+  "name": "classy-toolkit",
   "version": "1.0.0",
-  "description": "A collection of utilities that integrate with Zendesk",
+  "description": "A collection of utilities that integrate with Classy",
   "type": "module",
   "engines": {
     "node": ">= 20.0.0"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PRX/zendesk-toolkit.git"
+    "url": "git+https://github.com/PRX/classy-toolkit.git"
   },
   "keywords": [],
   "author": "",
   "license": "AGPL-3.0",
   "private": "true",
   "bugs": {
-    "url": "https://github.com/PRX/zendesk-toolkit/issues"
+    "url": "https://github.com/PRX/classy-toolkit/issues"
   },
-  "homepage": "https://github.com/PRX/zendesk-toolkit#readme",
+  "homepage": "https://github.com/PRX/classy-toolkit#readme",
   "dependencies": {
     "@aws-sdk/client-eventbridge": "*"
   },
