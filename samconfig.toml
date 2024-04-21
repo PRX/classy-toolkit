@@ -1,4 +1,4 @@
-# sam build && sam deploy --resolve-s3
+# sam build && sam deploy
 
 version = 0.1
 
@@ -9,6 +9,7 @@ s3_prefix = "classy-toolkit"
 confirm_changeset = false
 capabilities = "CAPABILITY_IAM"
 region = "us-east-2"
+resolve_s3 = true
 # Parameter overrides only need to be included when a parameter is changing
 # parameter_overrides = [
 #   "ClassyApiClientId=",
