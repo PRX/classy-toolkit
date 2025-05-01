@@ -132,6 +132,24 @@ function campaignUrl(campaign) {
   return `https://www.classy.org/manage/event/${campaign.id}/overview`;
 }
 
+function transactionLocation(tx) {
+  let location = "";
+
+  const city = tx?.metadata?._classy_pay?.payer?.city;
+  const state = tx?.metadata?._classy_pay?.payer?.state;
+  const country = tx?.metadata?._classy_pay?.payer?.country;
+
+  const locationParts = [];
+  if (city) locationParts.push(city);
+  if (state) locationParts.push(state);
+  if (country) locationParts.push(country);
+
+  if (city || state || country) {
+    location = ` (${locationParts.join(", ")})`;
+  }
+  return location;
+}
+
 function transactionUrl(transaction) {
   return `https://www.classy.org/admin/72482/transactions/${transaction.id}`;
 }
@@ -251,9 +269,11 @@ export const handler = async () => {
           const money = moneyAmountString(tx);
           const moneyAmt = parseFloat(money.match(/[0-9]+\.[0-9]+/g).at(-1));
 
+          const location = transactionLocation(tx);
+
           if (tx.frequency === "one-time") {
             text = text.concat(
-              `*${name}* made a <${txUrl}|${money}> donation to the <${campUrl}|${camp.name}> campaign${comment}`,
+              `*${name}*${location} made a <${txUrl}|${money}> donation to the <${campUrl}|${camp.name}> campaign${comment}`,
             );
 
             if (moneyAmt >= 100) {
@@ -262,7 +282,7 @@ export const handler = async () => {
             }
           } else {
             text = text.concat(
-              `*${name}* created a new ${tx.frequency} recurring giving plan for the <${campUrl}|${camp.name}> campaign for <${txUrl}|${money}>${comment}`,
+              `*${name}*${location} created a new ${tx.frequency} recurring giving plan for the <${campUrl}|${camp.name}> campaign for <${txUrl}|${money}>${comment}`,
             );
 
             if (moneyAmt >= 33) {
@@ -274,6 +294,8 @@ export const handler = async () => {
       } else if (activity.type === "ticket_purchased") {
         const tx = activity.transaction;
         const mem = activity.member;
+
+        const location = transactionLocation(tx);
 
         const ts = Date.parse(activity.created_at);
 
@@ -287,7 +309,7 @@ export const handler = async () => {
           const money = moneyAmountString(tx);
 
           const comment = tx.comment?.length ? `\n> ${tx.comment}` : "";
-          text = `:admission_tickets: *${name}* selected a <${txUrl}|${money}> reward from the <${campUrl}|${camp.name}> campaign${comment}`;
+          text = `:admission_tickets: *${name}*${location} selected a <${txUrl}|${money}> reward from the <${campUrl}|${camp.name}> campaign${comment}`;
         }
       }
 
