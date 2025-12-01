@@ -42,7 +42,7 @@ Resources:
               Resource: !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:event-bus/default
               Sid: AllowDefaultEventBusPut
           Version: "2012-10-17"
-      Runtime: nodejs22.x
+      Runtime: nodejs24.x
       Tags:
         prx:meta:tagging-version: 2021-04-07
         prx:cloudformation:stack-name: !Ref AWS::StackName
