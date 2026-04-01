@@ -88,6 +88,11 @@ function getAccessToken() {
   });
 }
 
+/**
+ * @param {string} token
+ * @param {string} path
+ * @returns {any}
+ */
 function httpGet(token, path) {
   return new Promise((resolve, reject) => {
     const options = {
@@ -122,6 +127,11 @@ function httpGet(token, path) {
   });
 }
 
+/**
+ * @param {any} member
+ * @param {any} tx
+ * @returns {string}
+ */
 function shortMemberName(member, tx) {
   if (tx.is_anonymous) {
     return `_Anonymous_`;
@@ -130,10 +140,18 @@ function shortMemberName(member, tx) {
   return `${member?.first_name} ${member?.last_name.charAt(0)}.`;
 }
 
+/**
+ * @param {any} campaign
+ * @returns {string}
+ */
 function campaignUrl(campaign) {
   return `https://www.classy.org/manage/event/${campaign.id}/overview`;
 }
 
+/**
+ * @param {any} tx
+ * @returns {string}
+ */
 function transactionLocation(tx) {
   let location = "";
 
@@ -152,10 +170,19 @@ function transactionLocation(tx) {
   return location;
 }
 
+/**
+ * @param {any} transaction
+ * @returns {string}
+ */
 function transactionUrl(transaction) {
   return `https://www.classy.org/admin/72482/transactions/${transaction.id}`;
 }
 
+/**
+ *
+ * @param {any} transaction
+ * @returns {string}
+ */
 function moneyAmountString(transaction) {
   const currency =
     transaction?.metadata?._classy_pay?.transaction?.currency ||
@@ -304,7 +331,7 @@ export const handler = async () => {
         // Only process transactions from the campaigns we care about, since
         // the last time the the poller ran
         if (ts >= threshold) {
-          const name = shortMemberName(mem);
+          const name = shortMemberName(mem, tx);
           const campUrl = campaignUrl(camp);
           const txUrl = transactionUrl(tx);
 
