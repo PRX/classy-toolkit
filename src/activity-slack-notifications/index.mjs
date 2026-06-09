@@ -255,7 +255,9 @@ export const handler = async () => {
         // Only process transactions from the campaigns we care about, since
         // the last time the the poller ran
         if (ts >= threshold) {
-          const comment = tx.comment?.length ? `\n> ${tx.comment}` : "";
+          const comment = tx.comment?.length
+            ? `\n> ${tx.comment.replaceAll("\n", "\n>")}`
+            : "";
           text = "";
 
           // For transactions that are part of the recurring donation plan,
