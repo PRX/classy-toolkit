@@ -1,3 +1,3 @@
 export const handler = async () => {
-  return "Okay!"
-}
+  return "Okay!";
+};
