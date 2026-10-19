@@ -88,3 +88,67 @@ Resources:
         - { Key: prx:dev:application, Value: Classy Toolkit }
       Threshold: 0
       TreatMissingData: notBreaching
+
+  CounterApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/counter-api
+      Description: >-
+        An API providing campaign counts
+      Environment:
+        Variables:
+          CLASSY_API_CLIENT_ID: !Ref ClassyApiClientId
+          CLASSY_API_CLIENT_SECRET: !Ref ClassyApiClientSecret
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors:
+          AllowMethods: [GET]
+          AllowOrigins: ["https://www.radiotopia.fm"]
+        InvokeMode: BUFFERED
+      Handler: index.handler
+      MemorySize: 128
+      Runtime: nodejs24.x
+      Tags:
+        prx:meta:tagging-version: 2021-04-07
+        prx:cloudformation:stack-name: !Ref AWS::StackName
+        prx:cloudformation:stack-id: !Ref AWS::StackId
+        prx:ops:environment: Production
+        prx:dev:application: Classy Toolkit
+      Timeout: 180
+  CounterApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${CounterApiFunction}
+      RetentionInDays: 30
+      Tags:
+        - { Key: prx:meta:tagging-version, Value: "2021-04-07" }
+        - { Key: prx:cloudformation:stack-name, Value: !Ref AWS::StackName }
+        - { Key: prx:cloudformation:stack-id, Value: !Ref AWS::StackId }
+        - { Key: prx:ops:environment, Value: Production }
+        - { Key: prx:dev:application, Value: Classy Toolkit }
+  CounterApiErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: "MINOR [Classy] Counter API <prod> EXPERIENCING ERRORS"
+      AlarmDescription: >-
+        The error rate on the Classy counter API
+        Lambda function has exceeded 0. Some requests may be failing.
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref CounterApiFunction
+      EvaluationPeriods: 2
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 60
+      Statistic: Sum
+      Tags:
+        - { Key: prx:meta:tagging-version, Value: "2021-04-07" }
+        - { Key: prx:cloudformation:stack-name, Value: !Ref AWS::StackName }
+        - { Key: prx:cloudformation:stack-id, Value: !Ref AWS::StackId }
+        - { Key: prx:ops:environment, Value: Production }
+        - { Key: prx:dev:application, Value: Classy Toolkit }
+      Threshold: 0
+      TreatMissingData: notBreaching
