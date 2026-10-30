@@ -1,4 +1,4 @@
-import { request, get } from "node:https";
+import { get, request } from "node:https";
 
 const { CLASSY_API_CLIENT_ID, CLASSY_API_CLIENT_SECRET } = process.env;
 
